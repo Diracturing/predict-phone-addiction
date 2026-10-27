@@ -1,0 +1,4 @@
+**/data/
+feature_eng_improvement_outputs/
+.ipynb_checkpoints/
+__pycache__/

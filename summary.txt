@@ -1,0 +1,34 @@
+Key strategies from the Kaggle phone-addiction (s6e8) write-ups
+================================================================
+
+1. Feature engineering
+   - Build composite/ratio features from raw columns (sums, fractions,
+     residuals)
+
+2. Frequency encoding
+   - Encode each category/value by how often it occurs (count-based,
+     never touches the target label).
+   - Because it doesn't use the label, it's safe to compute the counts
+     over train+test combined ("transductive"), giving a more accurate
+     frequency estimate than train-only counts, with no leakage risk.
+
+3. Target encoding numerical features with few unique values
+   - Continuous columns with few distinct values can be treated like
+     high-cardinality categoricals and target-encoded (smoothed mean of
+     the label per exact value), same as a normal categorical column.
+   - Must be computed out-of-fold (per-fold, using only that fold's
+     training rows) to avoid leaking the label into its own encoding.
+
+4. Decimal feature engineering
+   - Split continuous values into their fractional remainder and first
+     decimal digit (e.g. 4.372 -> frac=0.372, d1=3).
+   - These "decimal lattice" features can expose artifacts of how a
+     synthetic generator produced the numbers (digit-dependent rate
+     swings) that plain target encoding can't see, since TE treats each
+     exact value independently and can't pool across shared digits.
+
+5. Measure your noise floor before trusting any result
+   - Fold-to-fold spread within one 5-fold CV run understates/misrepresents
+     true uncertainty. Repeat the whole CV with different partition seeds
+     and take the std of the *means* — that's the real noise floor, and
+     it's model/pipeline-specific (recompute for big changes).
